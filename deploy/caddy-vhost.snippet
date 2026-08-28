@@ -14,6 +14,24 @@ desk.apollosolution.com.br {
 	# ⚠️ O ActionCable do Chatwoot é WebSocket e é o que faz a conversa
 	# atualizar sozinha. Sem passar o Upgrade, o inbox "trava" e o agente
 	# só vê mensagem nova ao recarregar a página — parece bug de produto.
+	# ⚠️ O CACHE DE UM ANO PRECISA SER QUEBRADO AQUI — e este é o motivo, que
+	# custou uma rodada inteira de "não mudou nada":
+	#
+	# O Rails serve /brand-assets/* e /vite/assets/* com
+	# Cache-Control: max-age=31556952. Para o Chatwoot isso é seguro, porque o
+	# nome dos bundles carrega hash do CONTEÚDO DELE. Só que o nosso rebrand
+	# reescreve o conteúdo DEPOIS do build do Chatwoot — o arquivo muda, o nome
+	# não. Resultado: o navegador de quem já visitou fica preso ao CSS azul e
+	# ao logo antigo por um ano, e a marca nova só aparece em aba anônima.
+	#
+	# `no-cache` NÃO desliga o cache: manda revalidar. O ETag continua valendo,
+	# então o custo é um 304 por carga, e a marca passa a chegar de verdade.
+	@marca path /brand-assets/* /vite/assets/*
+	# O prefixo `>` importa: sem ele o Caddy ACRESCENTA um segundo
+	# Cache-Control e a resposta sai com os dois (o de um ano inclusive),
+	# valendo o do Rails. `>` substitui o cabeçalho na resposta do proxy.
+	header @marca >Cache-Control "no-cache"
+
 	reverse_proxy apollo-desk-rails:3000 {
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}

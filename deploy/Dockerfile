@@ -8,7 +8,7 @@
 #
 # ⚠️ A TAG É FIXA DE PROPÓSITO. O script de cores depende dos bundles
 # compilados desta versão. Ao subir de versão, o build FALHA em vez de
-# entregar um app meio azul — ver rebrand-cores.sh.
+# entregar um app meio azul — ver rebrand-cores.rb.
 FROM chatwoot/chatwoot:v4.17.1
 
 # ── Logos ────────────────────────────────────────────────────────────────────
@@ -31,10 +31,8 @@ COPY brand/logo_thumbnail.svg  /app/public/brand-assets/logo_thumbnail.svg
 COPY brand/icons/ /app/public/
 
 # ── Paleta: azul do Chatwoot → verde da Apollo ───────────────────────────────
-COPY deploy/rebrand-cores.sh /tmp/rebrand-cores.sh
-RUN chmod +x /tmp/rebrand-cores.sh \
- && /tmp/rebrand-cores.sh \
- && rm /tmp/rebrand-cores.sh
+COPY deploy/rebrand-cores.rb /tmp/rebrand-cores.rb
+RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
 
 # ⚠️ NÃO acrescentar `USER` aqui. A imagem oficial do Chatwoot roda como ROOT
 # (`docker inspect chatwoot/chatwoot:v4.17.1` devolve User vazio) e o
