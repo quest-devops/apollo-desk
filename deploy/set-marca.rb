@@ -22,9 +22,14 @@ MARCA = {
   'BRAND_NAME'        => 'ApolloTeam',
   'BRAND_URL'         => 'https://apollosolution.com.br',
   'WIDGET_BRAND_URL'  => 'https://apollosolution.com.br',
-  'LOGO'              => '/brand-assets/logo.svg',
-  'LOGO_DARK'         => '/brand-assets/logo_dark.svg',
-  'LOGO_THUMBNAIL'    => '/brand-assets/logo_thumbnail.svg',
+  # ⚠️ Caminhos VERSIONADOS de propósito. Os nomes originais são servidos com
+  # cache de um ano; enquanto a marca apontava para eles, o navegador de quem
+  # já tinha aberto o app seguia mostrando o balão azul do Chatwoot mesmo com
+  # o arquivo certo no servidor. URL nova é a única forma de furar isso sem
+  # depender de o usuário limpar o cache. Ao trocar a marca, subir o sufixo.
+  'LOGO'              => '/brand-assets/apolloteam-logo-v2.svg',
+  'LOGO_DARK'         => '/brand-assets/apolloteam-logo-dark-v2.svg',
+  'LOGO_THUMBNAIL'    => '/brand-assets/apolloteam-icone-v2.svg',
   'TERMS_URL'         => 'https://apollosolution.com.br/termos',
   'PRIVACY_URL'       => 'https://apollosolution.com.br/privacidade'
 }.freeze

@@ -26,7 +26,12 @@ desk.apollosolution.com.br {
 	#
 	# `no-cache` NÃO desliga o cache: manda revalidar. O ETag continua valendo,
 	# então o custo é um 304 por carga, e a marca passa a chegar de verdade.
-	@marca path /brand-assets/* /vite/assets/*
+	# Os ícones de aba/PWA NÃO estão sob /brand-assets: são ~30 PNGs soltos na
+	# raiz (favicon-*, apple-icon-*, android-icon-*, ms-icon-*) e ficaram de
+	# fora da primeira versão deste matcher — por isso continuavam com o cache
+	# de um ano. Seus nomes são fixos pelo layout, então não dá para versionar:
+	# aqui o no-cache é a única saída.
+	@marca path /brand-assets/* /vite/assets/* /favicon* /apple-icon* /apple-touch-icon* /android-icon* /ms-icon*
 	# O prefixo `>` importa: sem ele o Caddy ACRESCENTA um segundo
 	# Cache-Control e a resposta sai com os dois (o de um ano inclusive),
 	# valendo o do Rails. `>` substitui o cabeçalho na resposta do proxy.

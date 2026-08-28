@@ -18,6 +18,25 @@ FROM chatwoot/chatwoot:v4.17.1
 #
 # Os caminhos são os que o Chatwoot serve em /brand-assets/ e que as linhas
 # LOGO, LOGO_DARK e LOGO_THUMBNAIL da tabela installation_configs apontam.
+# ⚠️ OS ATIVOS VÃO COM NOME VERSIONADO, e este é o motivo — custou duas
+# rodadas de "a logo continua a do Chatwoot":
+#
+# O Rails serve /brand-assets/ com Cache-Control de UM ANO. Enquanto os nossos
+# arquivos usavam os nomes originais (logo.svg, logo_thumbnail.svg), o
+# navegador de quem já tinha aberto o app continuava exibindo o balão azul do
+# Chatwoot — o arquivo no servidor estava certo, a cópia no cliente não. E
+# baixar o cabeçalho para `no-cache` no Caddy só vale para buscas NOVAS: a
+# entrada já gravada foi salva com o max-age antigo e não revalida sozinha.
+#
+# Nome novo = URL nova = nenhum cache antigo para atrapalhar. É o que o
+# Chatwoot faz com os próprios bundles, e o que faltava aqui. Ao trocar a
+# marca de novo, subir o sufixo (-v3) e ajustar o set-marca.rb junto.
+COPY brand/logo.svg            /app/public/brand-assets/apolloteam-logo-v2.svg
+COPY brand/logo_dark.svg       /app/public/brand-assets/apolloteam-logo-dark-v2.svg
+COPY brand/logo_thumbnail.svg  /app/public/brand-assets/apolloteam-icone-v2.svg
+
+# Os nomes originais também são substituídos, para qualquer ponto do código
+# que os referencie direto sem passar por InstallationConfig.
 COPY brand/logo.svg            /app/public/brand-assets/logo.svg
 COPY brand/logo_dark.svg       /app/public/brand-assets/logo_dark.svg
 COPY brand/logo_thumbnail.svg  /app/public/brand-assets/logo_thumbnail.svg
