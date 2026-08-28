@@ -11,7 +11,12 @@
 name: apollo-desk
 
 x-base: &base
-  image: chatwoot/chatwoot:v4.17.1
+  # Imagem DERIVADA (deploy/Dockerfile): Chatwoot v4.17.1 + logos ApolloTeam +
+  # paleta verde no lugar do azul. Rebrand assado na imagem, não no container.
+  image: apollo-desk:v4.17.1-apolloteam
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
   env_file: .env
   restart: unless-stopped
   volumes:

@@ -1,0 +1,66 @@
+# ApolloTeam — escreve a identidade da instalação na tabela installation_configs.
+#
+# Rodar:  docker exec apollo-desk-rails bundle exec rails runner /app/deploy/set-marca.rb
+#
+# POR QUE UM SCRIPT, E NÃO O .env
+# --------------------------------
+# Verificado em 28/ago/2026: NÃO existe variável de ambiente de marca no
+# Chatwoot. INSTALLATION_NAME, BRAND_NAME e companhia são valores HARDCODED em
+# config/installation_config.yml, carregados para o banco no primeiro seed.
+# Pôr essas chaves no .env não faz nada — foi testado, o .env dizia ApolloTeam
+# e o banco continuou "Chatwoot".
+#
+# E no YAML elas são `locked: true`, então também não aparecem na tela de
+# Installation Config do super_admin. Escrever na tabela é o único caminho.
+#
+# O que garante que isto PERSISTE é o DISABLE_ENTERPRISE=true do .env: sem ele,
+# o job Internal::ReconcilePlanConfigService reverte tudo para "Chatwoot" em
+# background — o rebrand parece ter funcionado e some depois.
+
+MARCA = {
+  'INSTALLATION_NAME' => 'ApolloTeam',
+  'BRAND_NAME'        => 'ApolloTeam',
+  'BRAND_URL'         => 'https://apollosolution.com.br',
+  'WIDGET_BRAND_URL'  => 'https://apollosolution.com.br',
+  'LOGO'              => '/brand-assets/logo.svg',
+  'LOGO_DARK'         => '/brand-assets/logo_dark.svg',
+  'LOGO_THUMBNAIL'    => '/brand-assets/logo_thumbnail.svg',
+  'TERMS_URL'         => 'https://apollosolution.com.br/termos',
+  'PRIVACY_URL'       => 'https://apollosolution.com.br/privacidade'
+}.freeze
+
+puts '── escrevendo ─────────────────────────────'
+MARCA.each do |nome, valor|
+  cfg = InstallationConfig.find_by(name: nome)
+  if cfg.nil?
+    InstallationConfig.create!(name: nome, value: valor, locked: true)
+    puts "  + #{nome} (criado)"
+  else
+    cfg.update!(value: valor)
+    puts "  ~ #{nome}"
+  end
+end
+
+# O Chatwoot serve estes valores de um cache; sem limpar, a interface continua
+# mostrando o nome antigo e a conclusão errada é "não funcionou".
+GlobalConfig.clear_cache
+
+puts
+puts '── conferindo pelo BANCO (nao pelo exit code) ──'
+erros = 0
+MARCA.each do |nome, esperado|
+  lido = InstallationConfig.find_by(name: nome)&.value
+  ok = lido.to_s == esperado
+  erros += 1 unless ok
+  puts format('  %-18s %s %s', nome, ok ? 'OK ' : 'ERRO', lido.inspect)
+end
+
+puts
+if erros.zero?
+  puts "OK: #{MARCA.size} chaves gravadas e conferidas."
+  puts 'Falta o teste que importa: REINICIAR e conferir de novo (e o que pega o'
+  puts 'ReconcilePlanConfigService). Conferir agora nao prova persistencia.'
+else
+  puts "ERRO: #{erros} chave(s) nao gravaram."
+  exit 1
+end
