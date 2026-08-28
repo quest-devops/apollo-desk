@@ -1,0 +1,72 @@
+# ApolloDesk — Chatwoot (build MIT, sem enterprise/). Instância interna da Apollo (laboratório da frente).
+#
+# Sem portas publicadas DE PROPÓSITO: quem expõe é o Caddy compartilhado
+# (apollo-cloud-caddy-1), que entra na rede deste stack e roteia por NOME DE
+# CONTAINER. Padrão da casa — igual Plan, Cloud, Mail, Key e CRM.
+#
+# Subir:   docker compose -f docker-compose.yml --env-file .env up -d
+# Ligar o Caddy na rede (uma vez, depois do primeiro up):
+#          docker network connect apollo-desk_default apollo-cloud-caddy-1
+# Logs:    docker compose logs -f rails
+name: apollo-desk
+
+x-base: &base
+  image: chatwoot/chatwoot:v4.17.1
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - storage_data:/app/storage
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+services:
+  # ⚠️ pgvector, não postgres puro. As migrations do Chatwoot criam a extensão
+  # "vector"; com a imagem oficial do Postgres o db:prepare quebra no meio —
+  # mesmo com DISABLE_ENTERPRISE=true, porque a migration não olha a flag.
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: apollo-desk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: ${POSTGRES_USERNAME:?defina POSTGRES_USERNAME no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d chatwoot_production"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    container_name: apollo-desk-redis
+    restart: unless-stopped
+    command: ["sh", "-c", "redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    env_file: .env
+    volumes:
+      - redis_data:/data
+
+  # Aplicação web. O entrypoint roda db:chatwoot_prepare no boot — a primeira
+  # subida demora (migrations + seed) e é normal ela ficar "unhealthy" um tempo.
+  rails:
+    <<: *base
+    container_name: apollo-desk-rails
+    entrypoint: docker/entrypoints/rails.sh
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+
+  # ⚠️ Sem o Sidekiq o produto PARECE funcionar e não funciona: webhook de
+  # entrada, envio para a Meta, campanha e e-mail são todos job em fila.
+  sidekiq:
+    <<: *base
+    container_name: apollo-desk-sidekiq
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:

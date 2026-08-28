@@ -1,0 +1,22 @@
+# ApolloDesk — bloco para o Caddyfile compartilhado, em /root/apollo-cloud/deploy/Caddyfile.
+#
+# ⚠️ Aquele Caddyfile é BIND MOUNT preso por inode: NÃO usar `sed -i` nem `mv`
+# para editá-lo (quebra o vínculo e o container passa a ler um arquivo fantasma).
+# Editar em cima do próprio arquivo (cat > / tee), fazendo backup datado antes.
+#
+# Endereço provisório: o definitivo é app.apollodesk.com.br, pendente do registro
+# do domínio apollodesk.com.br (E7 · APOLLO-140). Trocar aqui E no FRONTEND_URL.
+
+desk.apollosolution.com.br {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=15552000; includeSubDomains"
+
+	# ⚠️ O ActionCable do Chatwoot é WebSocket e é o que faz a conversa
+	# atualizar sozinha. Sem passar o Upgrade, o inbox "trava" e o agente
+	# só vê mensagem nova ao recarregar a página — parece bug de produto.
+	reverse_proxy apollo-desk-rails:3000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}
