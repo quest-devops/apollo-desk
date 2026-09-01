@@ -42,7 +42,11 @@ desk.apollosolution.com.br {
 	# fora da primeira versão deste matcher — por isso continuavam com o cache
 	# de um ano. Seus nomes são fixos pelo layout, então não dá para versionar:
 	# aqui o no-cache é a única saída.
-	@marca path /brand-assets/* /vite/assets/* /favicon* /apple-icon* /apple-touch-icon* /android-icon* /ms-icon*
+	# ⚠️ /apollo-login/* entra aqui pelo MESMO motivo, e ficou de fora na
+	# primeira versão: o tema da tela de login também é servido pelo Rails
+	# com o cache de um ano, então uma correção no CSS ou no JS não chegava
+	# a quem já tinha aberto a tela. Custou uma rodada de "não mudou nada".
+	@marca path /brand-assets/* /vite/assets/* /apollo-login/* /favicon* /apple-icon* /apple-touch-icon* /android-icon* /ms-icon*
 	# O prefixo `>` importa: sem ele o Caddy ACRESCENTA um segundo
 	# Cache-Control e a resposta sai com os dois (o de um ano inclusive),
 	# valendo o do Rails. `>` substitui o cabeçalho na resposta do proxy.

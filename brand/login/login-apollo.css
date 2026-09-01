@@ -127,15 +127,6 @@ body.apollo-login main > section:nth-of-type(2) {
   border-radius: 0;
 }
 
-/* Assinatura discreta no fim da coluna. */
-body.apollo-login main > section:nth-of-type(2)::after {
-  content: 'ApolloDesk';
-  display: block;
-  margin: 28px 0 0;
-  text-align: center;
-  font-size: 11px;
-  color: #6b746f;
-}
 
 /* ── Campos ────────────────────────────────────────────────────────────── */
 body.apollo-login main label {
@@ -254,4 +245,82 @@ body.apollo-login main form button:not([type='submit']) {
   body.apollo-login main > section:first-of-type h2 {
     font-size: 30px;
   }
+}
+
+/* ── Rodapé do padrão: divisor + SSO + legal + assinatura ──────────────────
+   Estes elementos NÃO existem no DOM do Chatwoot; são injetados pelo
+   login-apollo.js. Os estilos são os mesmos do ApolloMail, para os três
+   logins fecharem iguais. */
+body.apollo-login #apollo-login-rodape {
+  width: 100%;
+}
+
+body.apollo-login .alogin-divisor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0;
+  color: #8a938e;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+body.apollo-login .alogin-divisor::before,
+body.apollo-login .alogin-divisor::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(158, 171, 164, 0.25);
+}
+
+body.apollo-login .alogin-btn-sso {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #ffffff;
+  color: #202020;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.15s ease;
+}
+body.apollo-login .alogin-btn-sso:hover {
+  background: #efefef;
+}
+body.apollo-login .alogin-btn-sso img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Só ganha altura quando tem texto — enquanto o SSO não existe, o clique
+   escreve aqui em vez de mandar o usuário para um 404. */
+body.apollo-login .alogin-aviso:not(:empty) {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #f7b731;
+  text-align: center;
+}
+
+body.apollo-login .alogin-legal {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8a938e;
+  text-align: center;
+}
+
+body.apollo-login .alogin-rodape {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: #6b746f;
 }

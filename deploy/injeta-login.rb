@@ -37,9 +37,10 @@ ok = final.include?('login-apollo.css') && final.include?('login-apollo.js')
 abort 'ERRO: a injecao nao gravou no layout.' unless ok
 
 %w[login-apollo.css login-apollo.js login-bg.webp login-panel.webp
-   apollodesk-lockup.png JetBrainsMono-Variable.woff2 VT323-Regular.woff2].each do |f|
+   apollodesk-lockup.png aa-icone.png
+   JetBrainsMono-Variable.woff2 VT323-Regular.woff2].each do |f|
   caminho = "public/apollo-login/#{f}"
   abort "ERRO: ativo faltando — #{caminho}" unless File.exist?(caminho)
 end
 
-puts 'login Apollo injetado no layout, com os 7 ativos no lugar'
+puts 'login Apollo injetado no layout, com os 8 ativos no lugar'
