@@ -19,15 +19,12 @@ na revenda.
 A OFL permite redistribuição, inclusive embutida — desde que as fontes não sejam vendidas
 isoladamente e o aviso de licença acompanhe. Este arquivo cumpre esse papel.
 
-## ⚠️ Pendente de confirmação — arte de fundo do login
+## Arte de fundo do login
 
-`brand/login/login-bg.webp` e `brand/login/login-panel.webp` (a nebulosa) vieram do kit de
-marca da Apollo, via `apollo-mail-webui`. **A procedência não está documentada em lugar
-nenhum** — não se sabe se é arte própria, gerada, ou banco de imagens com restrição.
-
-**Enquanto isso não for confirmado, este repositório permanece PRIVADO.** Se a arte for
-nossa, basta tornar público; se for licenciada com restrição de redistribuição, trocar os
-dois arquivos (só eles) antes de publicar.
+`brand/login/login-bg.webp` e `brand/login/login-panel.webp` (a nebulosa) são **arte da
+Apollo**, confirmado pelo Leonardo em 01/set/2026. Vieram do kit de marca, via
+`apollo-mail-webui`, e são as mesmas usadas no ApolloAuth e no ApolloMail — é o que mantém
+os três logins com a mesma identidade.
 
 ## Marca Apollo
 
