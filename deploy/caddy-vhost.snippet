@@ -1,8 +1,19 @@
 # ApolloDesk — bloco para o Caddyfile compartilhado, em /root/apollo-cloud/deploy/Caddyfile.
 #
-# ⚠️ Aquele Caddyfile é BIND MOUNT preso por inode: NÃO usar `sed -i` nem `mv`
-# para editá-lo (quebra o vínculo e o container passa a ler um arquivo fantasma).
-# Editar em cima do próprio arquivo (cat > / tee), fazendo backup datado antes.
+# ⚠️ DUAS ARMADILHAS AO MEXER NAQUELE ARQUIVO — as duas já custaram tempo:
+#
+# 1. Ele é BIND MOUNT preso por inode: NÃO usar `sed -i` nem `mv` (quebra o
+#    vínculo e o container passa a ler um arquivo fantasma). Editar em cima do
+#    próprio arquivo (`cat >>` / `tee`), com backup datado antes.
+#
+# 2. NÃO substituir este bloco procurando o primeiro `
+}` depois do nome do
+#    host. O bloco tem um bloco ANINHADO (`reverse_proxy { ... }`), então o
+#    primeiro `}` fecha o interno, não o vhost — em 01/set um script assim
+#    apagou o vhost inteiro e o ApolloDesk saiu do ar sem nenhum erro no
+#    Caddy (a config seguia válida, só não tinha mais o host).
+#    Para atualizar: remover o bloco à mão, conferindo, e reanexar este
+#    arquivo com `cat >>`.
 #
 # Endereço provisório: o definitivo é app.apollodesk.com.br, pendente do registro
 # do domínio apollodesk.com.br (E7 · APOLLO-140). Trocar aqui E no FRONTEND_URL.

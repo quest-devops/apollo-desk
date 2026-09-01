@@ -60,6 +60,16 @@ COPY brand/logo_thumbnail.svg  /app/public/brand-assets/logo_thumbnail.svg
 # primeira verificação visual. Gerados do ícone canônico por brand/icons.
 COPY brand/icons/ /app/public/
 
+# ── Tela de login no padrão Apollo ───────────────────────────────────────────
+# Réplica do tema "terminal emerald" do ApolloAuth, o mesmo já portado para o
+# ApolloMail. É CSS sobre o DOM existente, não um componente novo: reescrever
+# a tela de login (que é um componente Vue compilado) exigiria fork do
+# frontend e build do Vite a cada release — a dívida que decidimos não pegar.
+COPY brand/login/ /app/public/apollo-login/
+
+COPY deploy/injeta-login.rb /tmp/injeta-login.rb
+RUN ruby /tmp/injeta-login.rb && rm /tmp/injeta-login.rb
+
 # ── Paleta: azul do Chatwoot → verde da Apollo ───────────────────────────────
 COPY deploy/rebrand-cores.rb /tmp/rebrand-cores.rb
 RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb

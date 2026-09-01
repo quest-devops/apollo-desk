@@ -1,0 +1,257 @@
+/*
+ * ApolloDesk — tela de login no padrão dos apps Apollo ("terminal emerald").
+ *
+ * Réplica do tema do ApolloAuth, o mesmo já portado para o ApolloMail
+ * (apollo-mail-webui/src/pages/login-apollo.css). Os valores — cores, raios,
+ * sombras, tamanhos — foram COPIADOS de lá, não redesenhados: é o que mantém
+ * os três logins idênticos quando vistos lado a lado.
+ *
+ * POR QUE ISTO É CSS SOBRE O DOM EXISTENTE, E NÃO UM COMPONENTE
+ * -------------------------------------------------------------
+ * A tela de login do Chatwoot é um componente Vue compilado no bundle.
+ * Reescrevê-la exigiria fork do frontend + build do Vite a cada release —
+ * exatamente a dívida que decidimos não pegar (o fork tem de ficar cirúrgico,
+ * limitado ao OIDC). Aqui o DOM do Chatwoot é preservado e só a apresentação
+ * muda, o que sobrevive a upgrade de versão desde que as classes não mudem.
+ *
+ * ⚠️ TUDO É ESCOPADO em `body.apollo-login`, marcada pelo login-apollo.js.
+ * Sem isso o tema vazaria para o app inteiro — o mesmo `main` é usado por
+ * outras rotas.
+ */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/apollo-login/JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'VT323';
+  src: url('/apollo-login/VT323-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Palco ─────────────────────────────────────────────────────────────── */
+body.apollo-login main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  box-sizing: border-box;
+  /* o conteúdo vive na metade direita; a esquerda é o painel fixo abaixo */
+  padding: 16px 16px 16px calc(50vw + 8px);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #eff8f3;
+  background:
+    linear-gradient(rgba(20, 20, 20, 0.8), rgba(20, 20, 20, 0.8)),
+    url('/apollo-login/login-bg.webp') center / cover no-repeat fixed;
+}
+
+/*
+ * Painel esquerdo. É `position: fixed` de propósito, e não um item de grid:
+ * assim ele ocupa a altura inteira da janela independentemente do tamanho do
+ * formulário, que é o comportamento do ApolloAuth. A geometria (50vw - 24px)
+ * é a mesma dos outros dois logins.
+ */
+body.apollo-login main::before {
+  content: '';
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  bottom: 16px;
+  width: calc(50vw - 24px);
+  border-radius: 16px;
+  background:
+    url('/apollo-login/apollodesk-lockup.png') no-repeat 28px 28px / 160px auto,
+    linear-gradient(to top, rgba(4, 15, 9, 0.82) 0%, rgba(4, 15, 9, 0) 42%),
+    #0d0d0d url('/apollo-login/login-panel.webp') center / cover no-repeat;
+  box-shadow:
+    0 0 44px rgba(47, 230, 140, 0.1),
+    inset 0 0 60px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* A frase do rodapé do painel. */
+body.apollo-login main::after {
+  content: 'ApolloDesk — todo o atendimento da sua empresa numa caixa só.';
+  position: fixed;
+  left: 40px;
+  bottom: 42px;
+  width: calc(50vw - 72px);
+  font-size: 14.5px;
+  line-height: 1.5;
+  opacity: 0.94;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* ── Coluna direita ────────────────────────────────────────────────────── */
+body.apollo-login main > section {
+  width: min(385px, 92vw);
+  max-width: none;
+  margin: 0 auto;
+}
+
+/* O lockup mora no painel; no topo do formulário ele seria repetição. */
+body.apollo-login main > section:first-of-type img {
+  display: none;
+}
+
+/* Título no tipo do ApolloAuth (VT323 com brilho). */
+body.apollo-login main > section:first-of-type h2 {
+  margin: 0 0 24px;
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+  font-size: 45px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #2fe68c;
+  text-align: center;
+  text-shadow:
+    0 0 1px rgba(47, 230, 140, 0.95),
+    0 0 6px rgba(47, 230, 140, 0.8),
+    0 0 15px rgba(47, 230, 140, 0.55),
+    0 0 34px rgba(47, 230, 140, 0.35);
+}
+
+/* Formulário solto, sem cartão — como no IdP. */
+body.apollo-login main > section:nth-of-type(2) {
+  margin-top: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Assinatura discreta no fim da coluna. */
+body.apollo-login main > section:nth-of-type(2)::after {
+  content: 'ApolloDesk';
+  display: block;
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: #6b746f;
+}
+
+/* ── Campos ────────────────────────────────────────────────────────────── */
+body.apollo-login main label {
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #eff8f3;
+}
+
+body.apollo-login main input[type='email'],
+body.apollo-login main input[type='password'],
+body.apollo-login main input[type='text'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 15px;
+  background: rgba(22, 25, 23, 0.85);
+  color: #eff8f3;
+  border: 1px solid rgba(158, 171, 164, 0.3);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  box-shadow: none;
+}
+body.apollo-login main input:focus {
+  outline: 0;
+  border-color: #2fe68c;
+  box-shadow: 0 0 0 3px rgba(47, 230, 140, 0.18);
+}
+body.apollo-login main input::placeholder {
+  color: #8a938e;
+  opacity: 1;
+  font-style: italic;
+}
+
+/*
+ * O autofill do Chrome pinta o campo de branco por cima de qualquer
+ * background — só o inset gigante sobrescreve. Herdado do CSS do ApolloMail,
+ * onde o problema apareceu primeiro.
+ */
+body.apollo-login main input:-webkit-autofill,
+body.apollo-login main input:-webkit-autofill:hover,
+body.apollo-login main input:-webkit-autofill:focus {
+  -webkit-box-shadow: inset 0 0 0 1000px #161916;
+  -webkit-text-fill-color: #eff8f3;
+  caret-color: #eff8f3;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+body.apollo-login main a {
+  color: #2fe68c;
+}
+
+/* ── Botão ─────────────────────────────────────────────────────────────── */
+/* O `type=submit` distingue o botão de entrar do olhinho de ver a senha, que
+   também é <button> dentro do mesmo formulário. */
+body.apollo-login main form button[type='submit'] {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #2fe68c;
+  color: #202020;
+  border: 1px solid #2fe68c;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 0 12px rgba(47, 230, 140, 0.5),
+    0 0 28px rgba(47, 230, 140, 0.28);
+  transition: box-shadow 0.15s ease;
+}
+body.apollo-login main form button[type='submit']:hover:not(:disabled) {
+  box-shadow:
+    0 0 16px rgba(47, 230, 140, 0.65),
+    0 0 36px rgba(47, 230, 140, 0.38);
+}
+body.apollo-login main form button[type='submit']:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+body.apollo-login main form button[type='submit'] span {
+  color: #202020;
+}
+
+/* O olhinho de revelar a senha continua discreto, sem virar botão verde. */
+body.apollo-login main form button:not([type='submit']) {
+  background: none;
+  box-shadow: none;
+  color: #8a938e;
+}
+
+/* ── Telas estreitas: sem split, painel fora ───────────────────────────── */
+@media (max-width: 1100px) {
+  body.apollo-login main {
+    padding: 40px 16px;
+  }
+  body.apollo-login main::before {
+    position: static;
+    display: block;
+    width: min(160px, 60vw);
+    height: 46px;
+    margin: 0 auto 28px;
+    border-radius: 0;
+    box-shadow: none;
+    background: url('/apollo-login/apollodesk-lockup.png') no-repeat center / contain;
+  }
+  body.apollo-login main::after {
+    display: none;
+  }
+  body.apollo-login main > section:first-of-type h2 {
+    font-size: 30px;
+  }
+}
