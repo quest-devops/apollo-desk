@@ -1,4 +1,4 @@
-# ApolloTeam — povoa o lab com dados de demonstração para navegar e avaliar o produto.
+# ApolloDesk — povoa o lab com dados de demonstração para navegar e avaliar o produto.
 #
 # Rodar:   docker exec apollo-desk-rails bundle exec rails runner /tmp/seed-demo.rb
 # Limpar:  docker exec apollo-desk-rails bundle exec rails runner /tmp/limpa-demo.rb

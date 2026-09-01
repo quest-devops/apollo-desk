@@ -1,4 +1,4 @@
-# ApolloTeam — troca a paleta AZUL do Chatwoot pelo VERDE da Apollo.
+# ApolloDesk — troca a paleta AZUL do Chatwoot pelo VERDE da Apollo.
 #
 # Roda no BUILD da imagem derivada (ver Dockerfile), nunca no container em
 # execução: mudança feita no container some no primeiro `pull` e não fica em

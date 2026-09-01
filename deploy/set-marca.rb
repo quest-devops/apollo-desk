@@ -1,4 +1,4 @@
-# ApolloTeam — escreve a identidade da instalação na tabela installation_configs.
+# ApolloDesk — escreve a identidade da instalação na tabela installation_configs.
 #
 # Rodar:  docker exec apollo-desk-rails bundle exec rails runner /app/deploy/set-marca.rb
 #
@@ -7,7 +7,7 @@
 # Verificado em 28/ago/2026: NÃO existe variável de ambiente de marca no
 # Chatwoot. INSTALLATION_NAME, BRAND_NAME e companhia são valores HARDCODED em
 # config/installation_config.yml, carregados para o banco no primeiro seed.
-# Pôr essas chaves no .env não faz nada — foi testado, o .env dizia ApolloTeam
+# Pôr essas chaves no .env não faz nada — foi testado, o .env dizia ApolloDesk
 # e o banco continuou "Chatwoot".
 #
 # E no YAML elas são `locked: true`, então também não aparecem na tela de
@@ -18,8 +18,8 @@
 # background — o rebrand parece ter funcionado e some depois.
 
 MARCA = {
-  'INSTALLATION_NAME' => 'ApolloTeam',
-  'BRAND_NAME'        => 'ApolloTeam',
+  'INSTALLATION_NAME' => 'ApolloDesk',
+  'BRAND_NAME'        => 'ApolloDesk',
   'BRAND_URL'         => 'https://apollosolution.com.br',
   'WIDGET_BRAND_URL'  => 'https://apollosolution.com.br',
   # ⚠️ Caminhos VERSIONADOS de propósito. Os nomes originais são servidos com
@@ -27,9 +27,9 @@ MARCA = {
   # já tinha aberto o app seguia mostrando o balão azul do Chatwoot mesmo com
   # o arquivo certo no servidor. URL nova é a única forma de furar isso sem
   # depender de o usuário limpar o cache. Ao trocar a marca, subir o sufixo.
-  'LOGO'              => '/brand-assets/apolloteam-logo-v2.svg',
-  'LOGO_DARK'         => '/brand-assets/apolloteam-logo-dark-v2.svg',
-  'LOGO_THUMBNAIL'    => '/brand-assets/apolloteam-icone-v2.svg',
+  'LOGO'              => '/brand-assets/apollodesk-logo-v4.svg',
+  'LOGO_DARK'         => '/brand-assets/apollodesk-logo-dark-v4.svg',
+  'LOGO_THUMBNAIL'    => '/brand-assets/apollodesk-icone-v4.svg',
   'TERMS_URL'         => 'https://apollosolution.com.br/termos',
   'PRIVACY_URL'       => 'https://apollosolution.com.br/privacidade'
 }.freeze

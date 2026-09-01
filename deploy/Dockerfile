@@ -1,4 +1,4 @@
-# ApolloTeam — imagem derivada do Chatwoot com a marca Apollo assada dentro.
+# ApolloDesk — imagem derivada do Chatwoot com a marca Apollo assada dentro.
 #
 # Por que uma imagem derivada, e não `docker exec` no container: mudança feita
 # no container em execução some no primeiro `docker compose pull` e não está
@@ -12,9 +12,18 @@
 FROM chatwoot/chatwoot:v4.17.1
 
 # ── Logos ────────────────────────────────────────────────────────────────────
-# logo.svg          → fundo claro (login, barra lateral)  → lockup grafite
-# logo_dark.svg     → fundo escuro (tema escuro)          → lockup branco
-# logo_thumbnail.svg→ ícone pequeno / e-mail / avatar     → ícone colorido
+# logo.svg          → lockup VERDE (emerald inteiro)
+# logo_dark.svg     → lockup verde-bicolor (Apollo branco + Desk emerald)
+# logo_thumbnail.svg→ ícone colorido (pequeno / e-mail / avatar)
+#
+# ⚠️ POR QUE O `logo.svg` É O VERDE, E NÃO O GRAFITE.
+# Verificado na tela: a página de LOGIN usa `LOGO` nos DOIS temas — ela nunca
+# troca para `LOGO_DARK`. Com o lockup grafite (#202020) ali, o resultado no
+# tema escuro era um wordmark invisível sobre fundo #1C1D20.
+# Das quatro variantes, só a VERDE é legível nos dois fundos: o grafite some no
+# escuro, e o branco e o bicolor somem no claro (o "Apollo" é quase branco).
+# O `LOGO_DARK` segue apontando para o bicolor, que é o certo nos pontos do
+# app que de fato honram o tema.
 #
 # Os caminhos são os que o Chatwoot serve em /brand-assets/ e que as linhas
 # LOGO, LOGO_DARK e LOGO_THUMBNAIL da tabela installation_configs apontam.
@@ -30,10 +39,12 @@ FROM chatwoot/chatwoot:v4.17.1
 #
 # Nome novo = URL nova = nenhum cache antigo para atrapalhar. É o que o
 # Chatwoot faz com os próprios bundles, e o que faltava aqui. Ao trocar a
-# marca de novo, subir o sufixo (-v3) e ajustar o set-marca.rb junto.
-COPY brand/logo.svg            /app/public/brand-assets/apolloteam-logo-v2.svg
-COPY brand/logo_dark.svg       /app/public/brand-assets/apolloteam-logo-dark-v2.svg
-COPY brand/logo_thumbnail.svg  /app/public/brand-assets/apolloteam-icone-v2.svg
+# marca de novo, subir o sufixo e ajustar o set-marca.rb junto — foi o que
+# aconteceu em 28/ago quando o produto passou de ApolloTeam para ApolloDesk
+# (v2 -> v3).
+COPY brand/logo.svg            /app/public/brand-assets/apollodesk-logo-v4.svg
+COPY brand/logo_dark.svg       /app/public/brand-assets/apollodesk-logo-dark-v4.svg
+COPY brand/logo_thumbnail.svg  /app/public/brand-assets/apollodesk-icone-v4.svg
 
 # Os nomes originais também são substituídos, para qualquer ponto do código
 # que os referencie direto sem passar por InstallationConfig.
@@ -45,7 +56,7 @@ COPY brand/logo_thumbnail.svg  /app/public/brand-assets/logo_thumbnail.svg
 # Os ícones de aba/PWA NÃO ficam em brand-assets e NÃO são cobertos por
 # InstallationConfig: são ~30 PNGs soltos em public/, referenciados direto no
 # layout. Sem trocá-los, a aba do navegador continua exibindo o logo do
-# Chatwoot com o nome ApolloTeam ao lado — foi exatamente o que apareceu na
+# Chatwoot com o nome do produto ao lado — foi exatamente o que apareceu na
 # primeira verificação visual. Gerados do ícone canônico por brand/icons.
 COPY brand/icons/ /app/public/
 

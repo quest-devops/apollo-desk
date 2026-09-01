@@ -1,4 +1,4 @@
-# ApolloTeam — remove TUDO que o seed-demo.rb criou, e só isso.
+# ApolloDesk — remove TUDO que o seed-demo.rb criou, e só isso.
 #
 # Rodar: docker exec apollo-desk-rails bundle exec rails runner /tmp/limpa-demo.rb
 #
