@@ -65,6 +65,19 @@ if admin_email
   puts '  + vinculada como ADMINISTRADORA da empresa'
 end
 
+# ── Administradores gerais da Apollo ───────────────────────────────────────
+# Empresa nova nasce com eles. Sem isto, a próxima empresa seria criada sem os
+# admins gerais e ninguém notaria até alguém precisar entrar — e aí seria um
+# "por que eu não consigo ver a conta do cliente?" sem causa aparente.
+caminho_admins = File.expand_path('admins-gerais.rb', __dir__)
+if File.exist?(caminho_admins)
+  puts
+  load caminho_admins
+else
+  puts
+  puts '  ⚠️ admins-gerais.rb não encontrado ao lado — rode-o à parte.'
+end
+
 # ── Conferência pelo BANCO, não pelo exit code ──────────────────────────────
 puts
 puts '── conferindo ─────────────────────────────'
