@@ -50,7 +50,7 @@ app.apollodesk.com.br {
 	# primeira versão: o tema da tela de login também é servido pelo Rails
 	# com o cache de um ano, então uma correção no CSS ou no JS não chegava
 	# a quem já tinha aberto a tela. Custou uma rodada de "não mudou nada".
-	@marca path /brand-assets/* /vite/assets/* /apollo-login/* /favicon* /apple-icon* /apple-touch-icon* /android-icon* /ms-icon*
+	@marca path /brand-assets/* /vite/assets/* /apollo-login/* /favicon* /apple-icon* /apple-touch-icon* /android-icon* /ms-icon* /manifest.json
 	# O prefixo `>` importa: sem ele o Caddy ACRESCENTA um segundo
 	# Cache-Control e a resposta sai com os dois (o de um ano inclusive),
 	# valendo o do Rails. `>` substitui o cabeçalho na resposta do proxy.

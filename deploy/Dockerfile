@@ -85,6 +85,14 @@ RUN ruby /tmp/patch-oidc.rb  && bundle install  && rm /tmp/patch-oidc.rb
 COPY deploy/rebrand-cores.rb /tmp/rebrand-cores.rb
 RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
 
+# ── O que o rebrand de CSS não alcança: PWA, meta tags e e-mails ─────────────
+# Precisa vir DEPOIS do rebrand-cores.rb: ele também limpa o `%232781f6`
+# (hex URL-encoded dentro de SVG embutido) que o outro não vê, porque procurava
+# só a forma com `#`. Foi esse resto que deixou o PWA instalado abrindo azul e
+# escrito "Chatwoot" — descoberto em 02/set.
+COPY deploy/rebrand-fora-do-css.rb /tmp/rebrand-fora-do-css.rb
+RUN ruby /tmp/rebrand-fora-do-css.rb && rm /tmp/rebrand-fora-do-css.rb
+
 # ⚠️ NÃO acrescentar `USER` aqui. A imagem oficial do Chatwoot roda como ROOT
 # (`docker inspect chatwoot/chatwoot:v4.17.1` devolve User vazio) e o
 # entrypoint precisa escrever em /app: ele roda `bundle install`, mexe em
