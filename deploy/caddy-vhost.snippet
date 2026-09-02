@@ -15,10 +15,14 @@
 #    Para atualizar: remover o bloco à mão, conferindo, e reanexar este
 #    arquivo com `cat >>`.
 #
-# Endereço provisório: o definitivo é app.apollodesk.com.br, pendente do registro
-# do domínio apollodesk.com.br (E7 · APOLLO-140). Trocar aqui E no FRONTEND_URL.
+# HOST CANÔNICO (E7 · APOLLO-140, 01/set/2026). Uma instância atende todas as
+# empresas e quem separa uma da outra é o LOGIN, nunca a URL — por isso host
+# canônico, e não um host por cliente. Mesmo desenho do app.apolloplan.com.br.
+#
+# O endereço antigo (desk.apollosolution.com.br) virou redirect permanente, no
+# fim deste arquivo.
 
-desk.apollosolution.com.br {
+app.apollodesk.com.br {
 	encode zstd gzip
 	header Strict-Transport-Security "max-age=15552000; includeSubDomains"
 
@@ -57,4 +61,11 @@ desk.apollosolution.com.br {
 		header_up X-Real-IP {remote_host}
 		header_up X-Forwarded-Proto {scheme}
 	}
+}
+
+# Endereco provisorio do laboratorio, aposentado em 01/set/2026 quando o
+# dominio proprio entrou. Fica como redirect permanente — nao remover: ha
+# links em e-mail, favoritos e nesta documentacao apontando para ca.
+desk.apollosolution.com.br {
+	redir https://app.apollodesk.com.br{uri} permanent
 }
