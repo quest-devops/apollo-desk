@@ -68,15 +68,40 @@ puts '── rebrand fora do CSS ───────────────�
 total = 0
 
 # 1) O manifest do PWA ──────────────────────────────────────────────────────
-total += edita('public/manifest.json', 'manifest.json: nome e cores do PWA') do |s|
-  s2, n = troca_azuis(s)
-  # Só os campos name/short_name. Um gsub cego de "Chatwoot" mexeria nos
-  # caminhos de ícone se algum dia tiverem o nome no arquivo.
-  s2 = s2.gsub(/("(?:short_name|name)"\s*:\s*")Chatwoot(")/) do
+# Aqui NÃO se usa regex: o manifest é JSON, e mexer em JSON com gsub é como
+# consertar o texto sem entender a estrutura — funciona até o dia em que o
+# upstream reordena um campo. Parseia, altera, reserializa.
+total += edita('public/manifest.json', 'manifest.json: nome, cores e ícone 512') do |s|
+  require 'json'
+  m = JSON.parse(s)
+  n = 0
+
+  %w[name short_name].each do |campo|
+    next if m[campo] == NOME
+
+    m[campo] = NOME
     n += 1
-    "#{Regexp.last_match(1)}#{NOME}#{Regexp.last_match(2)}"
   end
-  [s2, n]
+
+  %w[theme_color background_color].each do |campo|
+    next if m[campo].to_s.casecmp(VERDE).zero?
+
+    m[campo] = VERDE
+    n += 1
+  end
+
+  # ⚠️ O manifest do Chatwoot para em 192x192. O Chrome documenta 192 E 512
+  # como requisito de instalação, e sem o 512 ele ainda usa o 192 esticado no
+  # atalho — fica borrado. O arquivo já existe em public/, só nunca foi
+  # declarado.
+  if File.exist?('public/favicon-512x512.png') &&
+     m['icons'].none? { |i| i['sizes'] == '512x512' }
+    m['icons'] << { 'src' => '/favicon-512x512.png', 'sizes' => '512x512',
+                    'type' => 'image/png', 'density' => '4.0' }
+    n += 1
+  end
+
+  [JSON.pretty_generate(m) + "\n", n]
 end
 
 # 2) As meta tags do layout ─────────────────────────────────────────────────
