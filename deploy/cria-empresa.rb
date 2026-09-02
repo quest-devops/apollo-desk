@@ -45,8 +45,14 @@ if admin_email
     puts "  = pessoa já existe no ApolloDesk (#{usuario.name})"
     puts '    → vai passar a ver DUAS empresas, com o seletor no canto superior esquerdo'
   else
-    # Senha aleatória e descartada: quem define a senha é a própria pessoa,
-    # pelo "esqueci minha senha". Nunca definimos senha de usuário de cliente.
+    # Senha aleatória e DESCARTADA de propósito: desde a E2 (02/set) a entrada
+    # é pelo ApolloAuth, então a pessoa nunca usa senha aqui. O campo existe
+    # porque o Devise exige; ninguém precisa dele.
+    #
+    # ⚠️ O QUE DE FATO IMPORTA: esta pessoa PRECISA existir no ApolloAuth com
+    # ESTE MESMO e-mail. O casamento do SSO é por e-mail (User.from_email), e
+    # o JIT está desligado — quem não existe aqui é RECUSADO com
+    # "no-account-found" em vez de virar usuário duplicado em silêncio.
     usuario = User.create!(
       name: admin_nome || admin_email.split('@').first,
       email: admin_email,
@@ -75,8 +81,10 @@ end
 
 puts
 puts '── o que falta, e não é automático ────────'
-puts '  1. A pessoa precisa definir a senha em "Esqueceu-se da sua senha?".'
-puts '     ⚠️ ISSO DEPENDE DO SMTP. Sem ele a tela diz que enviou e nada sai.'
+puts '  1. A pessoa precisa existir no APOLLOAUTH com este mesmo e-mail.'
+puts '     É por e-mail que o SSO casa, e o JIT está desligado: quem não'
+puts '     existir aqui é recusado com "no-account-found" — de propósito.'
+puts '     Feito isso, ela entra por "Continuar com ApolloAuth". Sem senha.'
 puts '  2. Conectar os canais da empresa (WhatsApp, Instagram, e-mail, widget)'
 puts '     — cada empresa usa o PRÓPRIO número; nada é compartilhado.'
 puts '  3. Contrato e DPA: excluir este cliente = remover esta empresa aqui,'
