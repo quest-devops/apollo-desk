@@ -31,17 +31,22 @@
   var ROTAS = /^\/app\/(login|auth\/|signup)/;
 
   /*
-   * ⚠️ O SSO AINDA NÃO EXISTE — é a etapa E2 (fork com omniauth_openid_connect).
+   * Início do fluxo OIDC contra o ApolloAuth (E2, 01/set/2026).
    *
-   * O botão é renderizado com a aparência definitiva porque é assim que a
-   * família se apresenta, mas NÃO leva a lugar nenhum ainda: apontá-lo para
-   * uma rota inexistente entregaria um 404 ao usuário, que é pior que não ter
-   * botão. Enquanto SSO_URL for null ele explica a situação em vez de navegar.
+   * ⚠️ TEM DE SER POST, E COM TOKEN CSRF. Duas armadilhas de uma vez:
    *
-   * Quando a E2 entrar: trocar por '/omniauth/openid_connect'. É a única linha
-   * a mudar aqui.
+   *   1. O OmniAuth 2 só aceita POST na fase de request
+   *      (`OmniAuth.config.allowed_request_methods == [:post]`). Um link GET
+   *      devolve 404 — que parece "rota não existe" e manda a investigação
+   *      para o lado errado.
+   *   2. O Chatwoot usa omniauth-rails_csrf_protection: POST sem
+   *      `authenticity_token` é engolido e vira redirect para /auth/sign_in,
+   *      como se a credencial estivesse errada.
+   *
+   * Por isso montamos um formulário de verdade, com o token que o Rails já
+   * publica no <meta name="csrf-token"> da página.
    */
-  var SSO_URL = null;
+  var SSO_URL = '/omniauth/openid_connect';
   var ID_BLOCO = 'apollo-login-rodape';
 
   function criarBloco() {
@@ -67,12 +72,23 @@
     aviso.className = 'alogin-aviso';
 
     btn.addEventListener('click', function () {
-      if (SSO_URL) {
-        window.location.href = SSO_URL;
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      if (!meta || !meta.content) {
+        aviso.textContent =
+          'Não foi possível iniciar o login pelo ApolloAuth (token de segurança ausente). Recarregue a página.';
         return;
       }
-      aviso.textContent =
-        'O acesso pelo ApolloAuth ainda está em implantação. Por enquanto, entre com e-mail e senha.';
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = SSO_URL;
+      form.style.display = 'none';
+      var campo = document.createElement('input');
+      campo.type = 'hidden';
+      campo.name = 'authenticity_token';
+      campo.value = meta.content;
+      form.appendChild(campo);
+      document.body.appendChild(form);
+      form.submit();
     });
 
     var legal = document.createElement('p');

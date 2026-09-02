@@ -70,6 +70,17 @@ COPY brand/login/ /app/public/apollo-login/
 COPY deploy/injeta-login.rb /tmp/injeta-login.rb
 RUN ruby /tmp/injeta-login.rb && rm /tmp/injeta-login.rb
 
+# ── SSO: OIDC contra o ApolloAuth (E2) ───────────────────────────────────────
+# O ÚNICO ponto em que tocamos o código do Chatwoot. Ele não tem OIDC em edição
+# nenhuma: o core MIT traz só Devise e Google OAuth2, e o SAML mora em
+# enterprise/ — a mesma pasta cuja remoção faz a marca Apollo sobreviver.
+#
+# O patch são três edições (gem, provider, lista do modelo) e FALHA O BUILD se
+# qualquer âncora sumir numa versão nova — melhor quebrar aqui do que entregar
+# uma imagem em que o botão de SSO não faz nada.
+COPY deploy/patch-oidc.rb /tmp/patch-oidc.rb
+RUN ruby /tmp/patch-oidc.rb  && bundle install  && rm /tmp/patch-oidc.rb
+
 # ── Paleta: azul do Chatwoot → verde da Apollo ───────────────────────────────
 COPY deploy/rebrand-cores.rb /tmp/rebrand-cores.rb
 RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
