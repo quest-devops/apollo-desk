@@ -155,6 +155,14 @@ criados = atualizados = 0
 para_gravar.each do |c|
   contato = conta.contacts.find_by(phone_number: c[:fone])
   if contato
+    # Quem respondeu SAIR (opt-out.rb) NÃO volta para o público por reimportação.
+    # A planilha do cliente não sabe que a pessoa saiu; o Desk sabe.
+    if contato.labels.map(&:name).include?('opt-out')
+      stats[:opt_out_preservado] += 1
+      contato.update!(name: c[:nome], email: c[:email] || contato.email)
+      atualizados += 1
+      next
+    end
     contato.update!(name: c[:nome], email: c[:email] || contato.email)
     atualizados += 1
   else
@@ -175,6 +183,7 @@ puts '── conferindo ──────────────────�
 puts format('   criados      %d', criados)
 puts format('   atualizados  %d', atualizados)
 puts format('   falhas       %d', stats[:falha_gravar])
+puts format('   opt-out preservados (não voltaram ao público)  %d', stats[:opt_out_preservado]) if stats[:opt_out_preservado].positive?
 rotulos_usados.to_a.sort.each do |t|
   existe = Label.exists?(account: conta, title: t)
   n = conta.contacts.tagged_with(t, on: :labels).count
