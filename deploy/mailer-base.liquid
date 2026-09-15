@@ -1,0 +1,122 @@
+{% comment %}
+  ApolloDesk — casca dos e-mails INTERNOS (15/set/2026).
+
+  Substitui app/views/layouts/mailer/base.liquid do Chatwoot pela casca da
+  marca, a mesma do ApolloAuth e do ApolloPlan: fundo #0f1512, card #1a221d,
+  verde #2fe68c, Arial.
+
+  ⚠️ QUEM USA ESTE LAYOUT — e quem NÃO usa.
+  O `ApplicationMailer` (app/mailers/application_mailer.rb) declara
+  `layout 'mailer/base'`, e por aí passam TODOS os avisos internos: senha do
+  Devise, conversa atribuída ao atendente, avisos de administrador,
+  importação/exportação de contatos, canal desconectado.
+  O `ConversationReplyMailer` NÃO usa: ele escolhe layout em tempo de execução
+  (`choose_layout`) e, sem "branded email layout" ligado na caixa, a resposta
+  ao cliente final sai SEM casca nenhuma — só o texto. Isso é de propósito e
+  continua assim: e-mail de atendimento tem de parecer resposta de pessoa, e a
+  identidade ali seria a do CLIENTE (Dagostino, CD Tech...), nunca a da Apollo.
+
+  ⚠️ POR QUE DÁ PARA ESCURECER SEM MEXER NOS 30 MODELOS INTERNOS:
+  eles são HTML nu (`<p>Hi {{user.available_name}},</p>`), sem cor própria —
+  conferido: só 2 dos 30 cravam `color:`. Quem define tipografia e cor é esta
+  casca. Se um modelo novo vier com cor fixa, vai aparecer texto escuro sobre
+  fundo escuro; é o ponto a checar ao subir de versão do Chatwoot.
+
+  Variáveis do Chatwoot preservadas (não renomear):
+    content_for_layout        o corpo do e-mail
+    global_config.BRAND_NAME  nome da marca (vem de installation_configs)
+    global_config.BRAND_URL   link da marca
+    notification_settings_url link de preferências de notificação
+{% endcomment %}<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <title>{{ brand_name }}</title>
+    <style type="text/css">
+      /* O Gmail descarta a maior parte disto; o que precisa valer está
+         repetido no atributo style= de cada célula. Aqui ficam só as regras
+         que alcançam o conteúdo de DENTRO (os <p> e <a> dos 30 modelos),
+         que não têm como receber style inline nosso. */
+      img { max-width: 100%; border: none; }
+      body {
+        -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: none;
+        width: 100% !important;
+        margin: 0; padding: 0;
+        background-color: #0f1512;
+      }
+      table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+      .conteudo p {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px; line-height: 24px;
+        color: #c3cdc7; margin: 0 0 16px 0;
+      }
+      .conteudo h1, .conteudo h2, .conteudo h3 {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #f2f7f4; margin: 0 0 16px 0;
+      }
+      .conteudo h1 { font-size: 22px; line-height: 28px; }
+      .conteudo a { color: #2fe68c; text-decoration: underline; }
+      .conteudo strong, .conteudo b { color: #f2f7f4; }
+      .conteudo li { font-family: Arial, Helvetica, sans-serif; font-size: 16px;
+                     line-height: 24px; color: #c3cdc7; }
+      .rodape, .rodape span { color: #7d8781; }
+      .rodape a { color: #2fe68c; font-weight: bold; text-decoration: none; }
+      @media only screen and (max-width: 640px) {
+        .card { padding: 28px 22px !important; }
+        .pagina { padding: 24px 12px 32px !important; }
+      }
+    </style>
+  </head>
+
+  {% assign brand_name = global_config['BRAND_NAME'] %}
+  {% if brand_name == nil %}
+    {% assign brand_name = 'ApolloDesk' %}
+  {% endif %}
+  {% assign brand_url = global_config['BRAND_URL'] %}
+
+  <body style="margin:0; padding:0; background-color:#0f1512;" bgcolor="#0f1512">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%; background-color:#0f1512; margin:0;" bgcolor="#0f1512">
+      <tr>
+        <td align="center" class="pagina" style="padding:32px 16px;" valign="top">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:600px; margin:0 auto;">
+            <!-- Logo -->
+            <tr>
+              <td align="left" style="padding:0 8px 20px 8px;">
+                <img src="https://app.apolloauth.com.br/media/public/branding/apollodesk-lockup-email.png" alt="ApolloDesk" width="168" style="display:block; width:168px; height:auto; border:0;" />
+              </td>
+            </tr>
+            <!-- Card -->
+            <tr>
+              <td class="card" style="background-color:#1a221d; border-radius:12px; padding:40px 40px 24px 40px;" bgcolor="#1a221d">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+                  <tr>
+                    <td class="conteudo" style="font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; color:#c3cdc7;">
+                      {{ content_for_layout }}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Rodapé -->
+            <tr>
+              <td class="rodape" style="padding:24px 8px 0 8px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#7d8781;">
+                {% if brand_url != nil and brand_url != '' %}
+                  Este e-mail foi enviado por <a href="{{ brand_url }}" style="color:#2fe68c; font-weight:bold; text-decoration:none;">{{ brand_name }}</a>.
+                {% else %}
+                  Este e-mail foi enviado por <span style="color:#c3cdc7; font-weight:bold;">{{ brand_name }}</span>.
+                {% endif %}
+                {% if notification_settings_url != nil and notification_settings_url != '' %}
+                  <br />Você recebeu esta mensagem porque as notificações por e-mail estão ligadas na sua conta. <a href="{{ notification_settings_url }}" style="color:#2fe68c; font-weight:bold; text-decoration:none;">Ajustar preferências</a>.
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

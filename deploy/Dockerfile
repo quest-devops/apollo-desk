@@ -93,6 +93,20 @@ RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
 COPY deploy/rebrand-fora-do-css.rb /tmp/rebrand-fora-do-css.rb
 RUN ruby /tmp/rebrand-fora-do-css.rb && rm /tmp/rebrand-fora-do-css.rb
 
+# ── Casca dos e-mails internos ───────────────────────────────────────────────
+# Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
+# ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
+#
+# ⚠️ Vem DEPOIS do rebrand-fora-do-css.rb de propósito: aquele script EDITA o
+# base.liquid original trocando os azuis do Chatwoot por verde. Se o COPY viesse
+# antes, o script reescreveria a nossa casca em cima. Depois, a nossa vence —
+# e o trabalho dele nesse arquivo simplesmente deixa de importar.
+#
+# Alcança só os e-mails INTERNOS (senha, conversa atribuída, avisos de admin):
+# são os que passam pelo ApplicationMailer. A resposta ao cliente final sai sem
+# casca nenhuma, de propósito — ver o comentário no topo do mailer-base.liquid.
+COPY deploy/mailer-base.liquid /app/app/views/layouts/mailer/base.liquid
+
 # ⚠️ NÃO acrescentar `USER` aqui. A imagem oficial do Chatwoot roda como ROOT
 # (`docker inspect chatwoot/chatwoot:v4.17.1` devolve User vazio) e o
 # entrypoint precisa escrever em /app: ele roda `bundle install`, mexe em
