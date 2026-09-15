@@ -93,6 +93,15 @@ RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
 COPY deploy/rebrand-fora-do-css.rb /tmp/rebrand-fora-do-css.rb
 RUN ruby /tmp/rebrand-fora-do-css.rb && rm /tmp/rebrand-fora-do-css.rb
 
+# ── Embedded Signup na v4 (sem coexistência) ─────────────────────────────────
+# O Chatwoot 4.17.1 chama o FB.login sem `version` (cai na v2, que a Meta
+# aposenta em 15/out/2026) e pedindo o modo coexistência. Com o app aprovado, a
+# Meta respondia "precisa de uma supported permission"; a mesma configuração
+# de login funcionava na página de teste da própria Meta em v4. Descoberto em
+# 15/set. O patch derruba o build se a âncora do bundle sumir.
+COPY deploy/patch-embedded-signup.rb /tmp/patch-embedded-signup.rb
+RUN ruby /tmp/patch-embedded-signup.rb && rm /tmp/patch-embedded-signup.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
