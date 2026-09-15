@@ -1,4 +1,5 @@
-# ApolloDesk — faz o Embedded Signup do Chatwoot chamar a Meta na versão atual (v4).
+# ApolloDesk — faz o Embedded Signup do Chatwoot chamar a Meta na versão atual (v4),
+# mantendo o pedido de COEXISTÊNCIA (número no app WhatsApp Business + API).
 #
 # Roda no BUILD da imagem, depois do rebrand.
 #
@@ -19,10 +20,20 @@
 #     Business no celular), recurso que exige webhooks extras (history,
 #     smb_app_state_sync) que o Chatwoot não assina.
 #
-# A página de teste da Meta que funcionou usava: versão v4, sessionInfoVersion
-# 3, "Tipo de recurso: Nenhum". É exatamente isso que este patch faz o Desk
-# mandar. Coexistência fica para depois, como decisão separada — e quando for,
-# entra aqui com os webhooks correspondentes.
+# PRIMEIRO DIAGNÓSTICO (ERRADO, manhã de 15/set): achei que o defeito era o
+# pedido de coexistência e o tirei. O Desk passou a abrir o fluxo — mas só o
+# modo "número exclusivo da API", que obriga a loja a EXCLUIR a conta do
+# WhatsApp do celular. Não era isso que a Dagostino queria.
+#
+# DIAGNÓSTICO CERTO (tarde de 15/set): o erro vinha do PAR não bater. A
+# configuração de login 2208070036432193 nasceu na variação "Geral"; o pedido
+# de coexistência só é aceito por configuração criada na variação "Cadastro
+# incorporado do WhatsApp". Criada a segunda configuração (ApolloDesk –
+# coexistência) e apontado o WHATSAPP_CONFIGURATION_ID para ela, o featureType
+# volta. O que fica deste patch é só o `version: 'v4'`, que a Meta exige de
+# qualquer jeito. Coexistência: o que a loja responde no celular é espelhado
+# no Desk (webhook smb_message_echoes), e o Desk assina também `history` e
+# `smb_app_state_sync` no app.
 #
 # POR QUE NO BUNDLE E NÃO NA FONTE
 # --------------------------------
@@ -33,10 +44,10 @@
 # ela sumir, o build FALHA — melhor do que entregar um botão que não abre.
 
 ANTES_BUNDLE = 'featureType:"whatsapp_business_app_onboarding",sessionInfoVersion:"3"'.freeze
-DEPOIS_BUNDLE = 'sessionInfoVersion:"3",version:"v4"'.freeze
+DEPOIS_BUNDLE = 'featureType:"whatsapp_business_app_onboarding",sessionInfoVersion:"3",version:"v4"'.freeze
 
 ANTES_FONTE = "          featureType: 'whatsapp_business_app_onboarding',\n          sessionInfoVersion: '3',".freeze
-DEPOIS_FONTE = "          sessionInfoVersion: '3',\n          version: 'v4',".freeze
+DEPOIS_FONTE = "          featureType: 'whatsapp_business_app_onboarding',\n          sessionInfoVersion: '3',\n          version: 'v4',".freeze
 
 puts '── patch do Embedded Signup (v4, sem coexistência) ──'
 
@@ -58,10 +69,10 @@ if File.exist?(fonte) && File.read(fonte).include?(ANTES_FONTE)
 end
 
 # ── Conferir o EFEITO ──────────────────────────────────────────────────────
-resto = Dir['public/vite/assets/*.js'].count { |a| File.read(a).include?('whatsapp_business_app_onboarding') }
+resto = Dir['public/vite/assets/*.js'].count { |a| File.read(a).include?('whatsapp_business_app_onboarding') && !File.read(a).include?(DEPOIS_BUNDLE) }
 com_v4 = Dir['public/vite/assets/*.js'].count { |a| File.read(a).include?(DEPOIS_BUNDLE) }
 puts
 puts format('  bundles com version:"v4"            %d', com_v4)
-puts format('  bundles ainda pedindo coexistência  %d', resto)
+puts format('  bundles com coexistência sem v4      %d', resto)
 abort 'ERRO: patch incompleto.' if com_v4.zero? || resto.positive?
 puts "OK: Embedded Signup em v4 em #{tocados} bundle(s)."

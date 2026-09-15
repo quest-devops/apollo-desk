@@ -93,12 +93,14 @@ RUN ruby /tmp/rebrand-cores.rb && rm /tmp/rebrand-cores.rb
 COPY deploy/rebrand-fora-do-css.rb /tmp/rebrand-fora-do-css.rb
 RUN ruby /tmp/rebrand-fora-do-css.rb && rm /tmp/rebrand-fora-do-css.rb
 
-# ── Embedded Signup na v4 (sem coexistência) ─────────────────────────────────
+# ── Embedded Signup na v4 (com coexistência) ─────────────────────────────────
 # O Chatwoot 4.17.1 chama o FB.login sem `version` (cai na v2, que a Meta
-# aposenta em 15/out/2026) e pedindo o modo coexistência. Com o app aprovado, a
-# Meta respondia "precisa de uma supported permission"; a mesma configuração
-# de login funcionava na página de teste da própria Meta em v4. Descoberto em
-# 15/set. O patch derruba o build se a âncora do bundle sumir.
+# aposenta em 15/out/2026). O patch só acrescenta `version: 'v4'`; o pedido de
+# coexistência (número no app WhatsApp Business + API) fica como o Chatwoot
+# manda. O erro "precisa de uma supported permission" de 15/set NÃO era do
+# código: era a configuração de login da Meta criada na variação errada
+# ("Geral" em vez de "Cadastro incorporado do WhatsApp"). Ver o cabeçalho do
+# script. Derruba o build se a âncora do bundle sumir.
 COPY deploy/patch-embedded-signup.rb /tmp/patch-embedded-signup.rb
 RUN ruby /tmp/patch-embedded-signup.rb && rm /tmp/patch-embedded-signup.rb
 
