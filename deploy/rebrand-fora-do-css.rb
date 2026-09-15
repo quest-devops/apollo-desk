@@ -28,6 +28,8 @@
 # Então aqui a troca é NOMINAL: só os azuis que comprovadamente são do
 # Chatwoot.
 
+require 'fileutils'
+
 AZUIS_DO_CHATWOOT = %w[2781f6 1f93ff].freeze
 
 # O primário do app depois do rebrand (--blue-9 no tema claro), conferido no CSS
@@ -104,6 +106,21 @@ total += edita('public/manifest.json', 'manifest.json: nome, cores e ícone 512'
   [JSON.pretty_generate(m) + "\n", n]
 end
 
+# 1b) O manifest ganha NOME VERSIONADO, e o layout passa a apontar para ele ────
+# Quinta vez do mesmo alçapão: o /manifest.json foi entregue com max-age de um
+# ano ANTES de o Caddy passar a mandar no-cache. Cabeçalho novo não alcança cópia
+# que o navegador já considera fresca até 2027 — ele nem pergunta ao servidor.
+# Em 15/set o Chrome do Leonardo ainda oferecia "Instale o app: Chatwoot", azul,
+# com o servidor entregando ApolloDesk verde. A saída é a mesma das logos (-v4 no
+# nome): arquivo NOVO, que ninguém tem em cache. O /manifest.json continua
+# existindo para quem já apontava para ele.
+MANIFEST_VERSIONADO = 'manifest-apollodesk-v2.json'.freeze
+FileUtils.cp('public/manifest.json', "public/#{MANIFEST_VERSIONADO}")
+puts "  + public/#{MANIFEST_VERSIONADO} (cópia versionada)"
+total += edita('app/views/layouts/vueapp.html.erb', 'vueapp.html.erb: <link rel=manifest> versionado') do |s|
+  [s.gsub('href="/manifest.json"', %(href="/#{MANIFEST_VERSIONADO}")), s.scan('href="/manifest.json"').size]
+end
+
 # 2) As meta tags do layout ─────────────────────────────────────────────────
 total += edita('app/views/layouts/vueapp.html.erb', 'vueapp.html.erb: theme-color e TileColor') do |s|
   troca_azuis(s)
@@ -152,9 +169,11 @@ restos = alvos.filter_map do |arq|
 end
 
 nome_resto = File.read('public/manifest.json').scan(/"(?:short_name|name)"\s*:\s*"Chatwoot"/).size
+link_ok = File.read('app/views/layouts/vueapp.html.erb').include?(%(href="/#{MANIFEST_VERSIONADO}")) && File.exist?("public/#{MANIFEST_VERSIONADO}")
 
 puts format('  %-46s %s', 'azul do Chatwoot nos arquivos alvo', restos.empty? ? 'nenhum' : restos.join(' · '))
 puts format('  %-46s %s', 'nome "Chatwoot" no manifest', nome_resto.zero? ? 'nenhum' : "#{nome_resto} restante(s)")
+puts format('  %-46s %s', 'layout aponta para o manifest versionado', link_ok ? 'sim' : 'NÃO')
 
 # O `%23` nos assets é o defeito que originou este script: ele escapou tanto da
 # troca quanto do guarda do rebrand-cores.rb.
@@ -164,7 +183,7 @@ end
 puts format('  %-46s %s', 'azul URL-encoded (%23) nos assets', assets_resto.zero? ? 'nenhum' : "#{assets_resto} restante(s)")
 
 puts
-if restos.any? || nome_resto.positive? || assets_resto.positive?
+if restos.any? || nome_resto.positive? || assets_resto.positive? || !link_ok
   puts 'ERRO: sobrou marca do Chatwoot fora do CSS.'
   exit 1
 end
