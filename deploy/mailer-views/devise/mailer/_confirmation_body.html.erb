@@ -1,0 +1,93 @@
+<%# Corpo do convite/confirmação (16/set/2026): traduzido e REPINTADO na paleta
+    escura da casca. O original cravava cores claras (#0F172A, #EFF6FF,
+    #F8FBFF) — era um dos 2 dos 30 modelos com cor própria, e o e-mail mais
+    importante deles: é o primeiro que todo atendente novo recebe. %>
+<tr>
+  <td style="padding: 0 0 16px;">
+    <span style="display: inline-block; padding: 6px 10px; border-radius: 999px; background-color: #12291c; color: #2fe68c; font-size: 12px; line-height: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">
+      <%= eyebrow %>
+    </span>
+  </td>
+</tr>
+<tr>
+  <td style="padding: 0 0 12px;">
+    <h1 style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; color: #f2f7f4;"><%= heading %></h1>
+  </td>
+</tr>
+<tr>
+  <td style="padding: 0 0 8px;">
+    <p style="margin: 0; font-size: 16px; line-height: 24px; color: #c3cdc7;">Olá, <%= recipient_name %>.</p>
+  </td>
+</tr>
+<tr>
+  <td style="padding: 0 0 10px;">
+    <p style="margin: 0; font-size: 16px; line-height: 24px; color: #c3cdc7;"><%= intro_text %></p>
+  </td>
+</tr>
+<tr>
+  <td style="padding: 0 0 <%= detail_rows.any? || info_title.present? ? '16px' : '24px' %>;">
+    <p style="margin: 0; font-size: 16px; line-height: 24px; color: #c3cdc7;"><%= supporting_text %></p>
+  </td>
+</tr>
+<% if detail_rows.any? %>
+  <tr>
+    <td style="padding: 0 0 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border: 1px solid #2b352f; border-radius: 8px; background-color: #12291c;">
+        <% detail_rows.each_with_index do |(label, value), index| %>
+          <tr>
+            <td style="padding: 14px 18px;<%= ' border-top: 1px solid #2b352f;' unless index.zero? %>">
+              <p style="margin: 0 0 4px; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #94a09a;">
+                <%= label %>
+              </p>
+              <p style="margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; color: #f2f7f4;"><%= value %></p>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+<% end %>
+<% if action_url.present? %>
+  <tr>
+    <td style="padding: 0 0 24px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin: 0;">
+        <tr>
+          <td bgcolor="#2fe68c" style="border-radius: 8px; background-color: #2fe68c;">
+            <%= link_to(
+              action_text,
+              action_url,
+              style: 'display:block; padding:14px 32px; font-size:16px; line-height:20px; font-weight:700; color:#0c2b1a; text-align:center; text-decoration:none;'
+            ) %>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 0 0 20px;">
+      <p style="margin: 0; font-size: 13px; line-height: 20px; color: #94a09a;">
+        Se o botão não funcionar, use
+        <%= link_to(
+          'este link seguro',
+          action_url,
+          style: 'color:#2fe68c; text-decoration:underline; font-weight:600;'
+        ) %>.
+      </p>
+    </td>
+  </tr>
+<% elsif info_title.present? %>
+  <tr>
+    <td style="padding: 0 0 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border: 1px solid #2b352f; border-radius: 8px; background-color: #12291c;">
+        <tr>
+          <td style="padding: 18px;">
+            <p style="margin: 0 0 6px; font-size: 16px; line-height: 22px; font-weight: 700; color: #f2f7f4;">
+              <%= info_title %>
+            </p>
+            <p style="margin: 0; font-size: 16px; line-height: 24px; color: #c3cdc7;"><%= info_text %></p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+<% end %>

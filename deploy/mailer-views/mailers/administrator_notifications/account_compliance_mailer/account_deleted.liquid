@@ -1,0 +1,30 @@
+<p>Olá,</p>
+
+<p>Esta é uma notificação de que uma conta foi excluída definitivamente desta instalação do ApolloDesk.</p>
+
+<p>
+  <strong>Instalação:</strong> {{ meta.instance_url }}<br>
+  <strong>ID da conta:</strong> {{ meta.account_id }}<br>
+  <strong>Nome da conta:</strong> {{ meta.account_name }}<br>
+  <strong>Exclusão prevista para:</strong> {{ meta.marked_for_deletion_at }}<br>
+  <strong>Excluída em:</strong> {{ meta.deleted_at }}<br>
+  <strong>Motivo da exclusão:</strong> {{ meta.deletion_reason }}
+</p>
+
+{% if meta.deleted_user_count > 0 %}
+<p>
+  <strong>Usuários excluídos ({{ meta.deleted_user_count }}):</strong><br>
+  {% for user in meta.soft_deleted_users %}
+    ID: {{ user.user_id }}, e-mail: {{ user.user_email }}{% unless forloop.last %}<br>{% endunless %}
+  {% endfor %}
+</p>
+{% else %}
+<p>
+  <strong>Usuários excluídos:</strong> nenhum
+</p>
+{% endif %}
+
+<p>Este e-mail serve de registro para fins de conformidade.</p>
+
+<p>Obrigado,<br>
+ApolloDesk</p>

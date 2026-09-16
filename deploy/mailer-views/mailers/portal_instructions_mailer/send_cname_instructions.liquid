@@ -1,0 +1,30 @@
+<tr>
+  <td>
+    <p>Olá,</p>
+    <p>Para concluir a configuração da sua central de ajuda, é preciso ajustar o DNS do seu domínio personalizado: <strong>{{ cname_record | split: ' ' | first }}</strong>.</p>
+    <p>Adicione o seguinte registro CNAME no painel do seu provedor de DNS:</p>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p><strong>{{ cname_record }}</strong></p>
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <p>Passo a passo:</p>
+
+    <ol>
+      <li>Entre no painel do seu provedor de DNS</li>
+      <li>Abra a área de gerenciamento de DNS</li>
+      <li>Crie um novo registro CNAME com os dados acima</li>
+      <li>Salve e aguarde até 24 horas para o DNS propagar</li>
+    </ol>
+
+    <p>Assim que o registro estiver ativo, o seu domínio recebe automaticamente um certificado SSL.</p>
+
+    <p>Se tiver dúvida ou precisar de ajuda, fale com a gente em suporte@apollosolution.com.br.</p>
+  </td>
+</tr>

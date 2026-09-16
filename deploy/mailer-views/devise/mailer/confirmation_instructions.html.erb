@@ -1,0 +1,65 @@
+<%
+  brand_name = global_config['BRAND_NAME'] || 'ApolloDesk'
+  recipient_name = @resource.name.presence || @resource.email
+  account_user = @resource&.account_users&.first
+  inviter = account_user&.inviter
+  account_name = account_user&.account&.name
+  invited_user = inviter.present? && @resource.unconfirmed_email.blank?
+
+  eyebrow = 'Boas-vindas'
+  heading = 'Confirme seu e-mail para começar'
+  intro_text =
+    "Boas-vindas ao #{brand_name}. Só falta confirmar o seu endereço de e-mail para você começar a usar a conta."
+  supporting_text = 'Leva só um instante.'
+  action_text = 'Confirmar minha conta'
+  action_url = frontend_url('auth/confirmation', confirmation_token: @token)
+  info_title = nil
+  info_text = nil
+  detail_rows = []
+  detail_rows << ['Novo e-mail', @resource.unconfirmed_email] if @resource.unconfirmed_email.present?
+
+  if @resource.unconfirmed_email.present?
+    eyebrow = 'Troca de e-mail'
+    heading = 'Confirme o seu novo e-mail'
+    intro_text = "Recebemos um pedido para trocar o e-mail da sua conta no #{brand_name}."
+    supporting_text = 'Confirme o novo endereço abaixo para concluir a troca.'
+    action_text = 'Confirmar e-mail'
+  elsif @resource.confirmed?
+    eyebrow = 'Conta pronta'
+    heading = 'Sua conta está pronta'
+    intro_text = "Sua conta no #{brand_name} já está ativa."
+    supporting_text = 'Use o botão abaixo para entrar e continuar de onde parou.'
+    action_text = 'Abrir minha conta'
+    action_url = frontend_url('auth/sign_in')
+    detail_rows = []
+  elsif invited_user
+    eyebrow = 'Convite'
+    heading = account_name.present? ? "Você foi convidado(a) para #{account_name}" : "Você foi convidado(a) para o #{brand_name}"
+    intro_text = if account_name.present?
+      "#{inviter.name} convidou você para a equipe #{account_name} no #{brand_name}."
+    else
+      "#{inviter.name} convidou você para o #{brand_name}."
+    end
+    supporting_text = 'Crie a sua conta para começar a atender junto com a equipe.'
+    action_text = 'Aceitar convite'
+    action_url = frontend_url(
+      'auth/password/edit',
+      reset_password_token: @resource.send(:set_reset_password_token)
+    )
+    detail_rows = [['Convidado(a) por', inviter.name]]
+    detail_rows << ['Equipe', account_name] if account_name.present?
+  end
+%>
+
+<%= render partial: 'devise/mailer/confirmation_body', locals: {
+  action_text: action_text,
+  action_url: action_url,
+  detail_rows: detail_rows,
+  eyebrow: eyebrow,
+  heading: heading,
+  info_text: info_text,
+  info_title: info_title,
+  intro_text: intro_text,
+  recipient_name: recipient_name,
+  supporting_text: supporting_text
+} %>

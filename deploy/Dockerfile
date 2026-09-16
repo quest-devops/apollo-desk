@@ -118,6 +118,35 @@ RUN ruby /tmp/patch-embedded-signup.rb && rm /tmp/patch-embedded-signup.rb
 # casca nenhuma, de propósito — ver o comentário no topo do mailer-base.liquid.
 COPY deploy/mailer-base.liquid /app/app/views/layouts/mailer/base.liquid
 
+# ── Texto dos e-mails em português ─────────────────────────────────────────────
+# Os 35 modelos do Chatwoot reescritos em pt-BR (16/set/2026), no MESMO caminho
+# que ocupam na imagem, então o COPY sobrescreve um a um.
+#
+# ⚠️ Dois deles não eram só tradução: o convite/confirmação (_confirmation_body)
+# e as bolhas de mensagem das notificações de conversa cravavam cores CLARAS.
+# Na casca escura um virava escuro-sobre-escuro e o outro claro-sobre-claro —
+# foram repintados na paleta da marca.
+#
+# ⚠️ conversation_reply_mailer é o que chega ao CLIENTE FINAL e sai sem casca:
+# ali só os rótulos foram traduzidos (Anexos, De, Assunto), sem mexer em cor.
+#
+# ⚠️ Ao subir de versão do Chatwoot: estes arquivos SUBSTITUEM os originais.
+# Modelo novo que a versão trouxer não é coberto; modelo alterado por ela é
+# silenciosamente sobrescrito pela nossa cópia antiga. Comparar antes.
+COPY deploy/mailer-views/mailers/       /app/app/views/mailers/
+COPY deploy/mailer-views/devise/mailer/ /app/app/views/devise/mailer/
+
+# ⚠️ O CONVITE/CONFIRMAÇÃO NÃO USA o arquivo copiado acima. Existe uma cópia em
+# enterprise/app/views/devise/mailer/ que tem PRIORIDADE — descoberto pelo
+# backtrace em 16/set/2026. Ela acrescenta um ramo de SAML que chama
+# `account.saml_enabled?`, método de um módulo enterprise que não está
+# carregado aqui: o render levantava NoMethodError e O CONVITE POR E-MAIL NÃO
+# SAÍA PARA NINGUÉM, já antes desta tradução. Nosso login é OIDC pelo
+# ApolloAuth, não o SAML do Chatwoot, então o ramo não faz falta: a versão
+# traduzida (sem SAML) substitui as duas — traduz e conserta de uma vez.
+COPY deploy/mailer-views/devise/mailer/confirmation_instructions.html.erb \
+     /app/enterprise/app/views/devise/mailer/confirmation_instructions.html.erb
+
 # ⚠️ NÃO acrescentar `USER` aqui. A imagem oficial do Chatwoot roda como ROOT
 # (`docker inspect chatwoot/chatwoot:v4.17.1` devolve User vazio) e o
 # entrypoint precisa escrever em /app: ele roda `bundle install`, mexe em
