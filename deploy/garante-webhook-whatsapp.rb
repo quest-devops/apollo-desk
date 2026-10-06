@@ -1,4 +1,4 @@
-# ApolloDesk — garante que TODA caixa de WhatsApp Cloud recebe mensagem da Meta.
+# ApolloDesk — garante que TODA caixa de WhatsApp Cloud e de Messenger recebe mensagem da Meta.
 #
 # Rodar (cron, a cada 10 min — ver /root/garante-webhook-whatsapp.sh no apollo-prod):
 #   docker exec apollo-desk-rails bundle exec rails runner /tmp/garante-webhook-whatsapp.rb
@@ -100,6 +100,76 @@ Channel::Whatsapp.where(provider: 'whatsapp_cloud').includes(:inbox).find_each d
   end
 end
 
+puts "WhatsApp: #{corrigidos} corrigido(s), #{problemas} problema(s)."
+
+# ── Messenger (06/out/2026) ───────────────────────────────────────────────
+# Mesma classe de falha silenciosa: o webhook do objeto `page` estava em /bot,
+# verificado e ativo, mas SEM CAMPOS assinados no nível do app — a Página fica
+# ligada ao app (subscribed_apps ok) e nenhuma mensagem chega. Aqui conferimos
+# (1) os campos do webhook do app e (2) cada Página ligada ao app, e só agimos
+# no que falta. Mesmo ENSAIO, mesma saída.
+CAMPOS_PAGE = %w[messages messaging_postbacks message_deliveries message_reads message_echoes standby messaging_handovers].freeze
+# Por Página, o próprio Chatwoot assina este conjunto (sem postbacks) — conferimos o mesmo, para não brigar com ele.
+CAMPOS_PAGINA = (CAMPOS_PAGE - %w[messaging_postbacks]).freeze
+fb_id  = GlobalConfigService.load('FB_APP_ID', nil).to_s
+fb_sec = GlobalConfigService.load('FB_APP_SECRET', nil).to_s
+fb_vt  = GlobalConfigService.load('FB_VERIFY_TOKEN', nil).to_s
+app_tok = "#{fb_id}|#{fb_sec}"
+callback_bot = "#{ENV.fetch('FRONTEND_URL', 'https://app.apollodesk.com.br')}/bot"
+
 puts
-puts "OK: #{corrigidos} corrigido(s), #{problemas} problema(s)."
+puts '── guarda de webhook do Messenger ──'
+if fb_id.empty? || fb_sec.empty?
+  puts '  ! FB_APP_ID/FB_APP_SECRET ausentes — pulando'
+  problemas += 1
+else
+  subs = HTTParty.get("#{API}/#{fb_id}/subscriptions?access_token=#{app_tok}").parsed_response.to_h
+  pg = subs.fetch('data', []).find { |s| s['object'] == 'page' } || {}
+  campos = (pg['fields'] || []).map { |f| f['name'] }
+  faltam = CAMPOS_PAGE - campos
+  if pg['callback_url'] == callback_bot && pg['active'] && faltam.empty?
+    puts "  = app #{fb_id}: webhook page ok (#{campos.size} campos)"
+  else
+    puts "  #{ENSAIO ? '~' : '+'} app #{fb_id}: webhook page callback='#{pg['callback_url']}' ativo=#{pg['active']} faltam=#{faltam.join(',').presence || '(nenhum)'}"
+    unless ENSAIO
+      r = HTTParty.post("#{API}/#{fb_id}/subscriptions", body: { object: 'page', callback_url: callback_bot, verify_token: fb_vt,
+                                                                  fields: CAMPOS_PAGE.join(','), access_token: app_tok })
+      puts "     ↳ subscriptions: #{mask(mask(r.body, fb_sec), fb_vt)}"
+      pg2 = HTTParty.get("#{API}/#{fb_id}/subscriptions?access_token=#{app_tok}").parsed_response.to_h.fetch('data', []).find { |s| s['object'] == 'page' } || {}
+      ok = (CAMPOS_PAGE - (pg2['fields'] || []).map { |f| f['name'] }).empty? && pg2['callback_url'] == callback_bot
+      puts ok ? '     ↳ conferido na Meta: ok' : "     ↳ AINDA ERRADO: #{pg2}"
+      ok ? corrigidos += 1 : problemas += 1
+    end
+  end
+
+  Channel::FacebookPage.includes(:inbox).find_each do |ch|
+    rotulo = "página #{ch.page_id} (#{ch.inbox&.name})"
+    tok = ch.page_access_token.to_s
+    r = HTTParty.get("#{API}/#{ch.page_id}/subscribed_apps?access_token=#{tok}").parsed_response.to_h
+    if r['error']
+      puts "  ! #{rotulo}: Meta recusou a leitura — #{mask(r['error']['message'], tok)} (reconectar a Página no Desk)"
+      problemas += 1
+      next
+    end
+    app = r.fetch('data', []).find { |a| a['id'].to_s == fb_id }
+    faltam_pg = CAMPOS_PAGINA - (app ? app['subscribed_fields'].to_a : [])
+    if app && faltam_pg.empty?
+      puts "  = #{rotulo}: ok"
+      next
+    end
+    puts "  #{ENSAIO ? '~' : '+'} #{rotulo}: #{app ? "faltam #{faltam_pg.join(',')}" : 'Página não ligada ao app'}"
+    next if ENSAIO
+
+    r2 = HTTParty.post("#{API}/#{ch.page_id}/subscribed_apps", body: { subscribed_fields: CAMPOS_PAGINA.join(','), access_token: tok })
+    puts "     ↳ subscribed_apps: #{mask(r2.body, tok)}"
+    r3 = HTTParty.get("#{API}/#{ch.page_id}/subscribed_apps?access_token=#{tok}").parsed_response.to_h
+    app3 = r3.fetch('data', []).find { |a| a['id'].to_s == fb_id }
+    ok = app3 && (CAMPOS_PAGINA - app3['subscribed_fields'].to_a).empty?
+    puts ok ? '     ↳ conferido na Meta: ok' : "     ↳ AINDA ERRADO: #{mask(r3.to_s, tok)}"
+    ok ? corrigidos += 1 : problemas += 1
+  end
+end
+
+puts
+puts "TOTAL: #{corrigidos} corrigido(s), #{problemas} problema(s)."
 exit 1 if problemas.positive?
