@@ -119,6 +119,15 @@ RUN ruby /tmp/patch-etiquetas-restritas.rb && rm /tmp/patch-etiquetas-restritas.
 COPY deploy/patch-notificacoes-padrao.rb /tmp/patch-notificacoes-padrao.rb
 RUN ruby /tmp/patch-notificacoes-padrao.rb && rm /tmp/patch-notificacoes-padrao.rb
 
+# ── Espelho das respostas na caixa (pasta Enviados) ────────────────────────
+# O Chatwoot responde por SMTP e nao grava copia na caixa: Enviados fica vazia e
+# quem abre o webmail ve so metade da conversa. Este observer grava cada resposta
+# enviada na pasta Enviados do proprio canal (Leonardo, 26/out/2026: "o webmail e
+# a fonte da verdade, o Desk deve ser um espelhamento dele").
+# E um arquivo NOVO (initializer), nao uma edicao do upstream -- por isso COPY
+# direto, sem script de ancora: nao ha o que quebrar na proxima versao.
+COPY deploy/apollo-espelho-enviados.rb /app/config/initializers/apollo_espelho_enviados.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
