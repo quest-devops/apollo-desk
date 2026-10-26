@@ -112,6 +112,13 @@ RUN ruby /tmp/patch-embedded-signup.rb && rm /tmp/patch-embedded-signup.rb
 COPY deploy/patch-etiquetas-restritas.rb /tmp/patch-etiquetas-restritas.rb
 RUN ruby /tmp/patch-etiquetas-restritas.rb && rm /tmp/patch-etiquetas-restritas.rb
 
+# ── Padrão de notificações do usuário novo ───────────────────────────────────
+# Todos os alertas push ligados, nenhum por e-mail, som para todas as
+# conversas (Leonardo, 26/out/2026). Os usuários existentes foram ajustados
+# no banco; isto cobre os próximos. Derruba o build se a âncora sumir.
+COPY deploy/patch-notificacoes-padrao.rb /tmp/patch-notificacoes-padrao.rb
+RUN ruby /tmp/patch-notificacoes-padrao.rb && rm /tmp/patch-notificacoes-padrao.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
