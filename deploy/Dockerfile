@@ -104,6 +104,14 @@ RUN ruby /tmp/rebrand-fora-do-css.rb && rm /tmp/rebrand-fora-do-css.rb
 COPY deploy/patch-embedded-signup.rb /tmp/patch-embedded-signup.rb
 RUN ruby /tmp/patch-embedded-signup.rb && rm /tmp/patch-embedded-signup.rb
 
+# ── Etiquetas restritas por usuário ──────────────────────────────────────────
+# Regra de dado nos custom_attributes da conta (etiquetas_restritas: padrão +
+# ids de usuário). Índice de etiquetas filtra; gravação preserva o que o
+# usuário não pode ver. Pedido do Leonardo (26/out/2026): na Dagostino, toda
+# etiqueta com "corp" só para o Roberto. Derruba o build se as âncoras sumirem.
+COPY deploy/patch-etiquetas-restritas.rb /tmp/patch-etiquetas-restritas.rb
+RUN ruby /tmp/patch-etiquetas-restritas.rb && rm /tmp/patch-etiquetas-restritas.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
