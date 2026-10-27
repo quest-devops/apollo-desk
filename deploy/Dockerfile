@@ -128,6 +128,15 @@ RUN ruby /tmp/patch-notificacoes-padrao.rb && rm /tmp/patch-notificacoes-padrao.
 # direto, sem script de ancora: nao ha o que quebrar na proxima versao.
 COPY deploy/apollo-espelho-enviados.rb /app/config/initializers/apollo_espelho_enviados.rb
 
+# ── Variáveis nos modelos do WhatsApp (E14) ──────────────────────────────────
+# Seletor de variáveis (JS injetado no layout da SPA) nos campos de variável da
+# campanha e da janela de modelos da conversa; e resolução Liquid no envio por
+# conversa (o Chatwoot só resolvia na campanha) + hora_atual/data_atual nos dois.
+# Derruba o build se as âncoras sumirem.
+COPY deploy/variaveis-modelo.js /app/public/apollodesk/variaveis-modelo.js
+COPY deploy/patch-variaveis-modelo.rb /tmp/patch-variaveis-modelo.rb
+RUN ruby /tmp/patch-variaveis-modelo.rb && rm /tmp/patch-variaveis-modelo.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
