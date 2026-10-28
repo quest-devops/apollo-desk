@@ -137,6 +137,15 @@ COPY deploy/variaveis-modelo.js /app/public/apollodesk/variaveis-modelo.js
 COPY deploy/patch-variaveis-modelo.rb /tmp/patch-variaveis-modelo.rb
 RUN ruby /tmp/patch-variaveis-modelo.rb && rm /tmp/patch-variaveis-modelo.rb
 
+# ── Campanhas de WhatsApp rastreáveis (E16) ──────────────────────────────────
+# Cada envio da campanha vira mensagem real na conversa do contato (status da
+# Meta casado pelo próprio Chatwoot; resposta cai na mesma conversa) e o relatório
+# por campanha (tela que o front já traz) ganha backend nosso, em MIT, sem tocar
+# em enterprise/. JS: botão do relatório nos cards, pt-BR, "Responderam", CSV.
+COPY deploy/campanhas.js /app/public/apollodesk/campanhas.js
+COPY deploy/patch-campanhas.rb /tmp/patch-campanhas.rb
+RUN ruby /tmp/patch-campanhas.rb && rm /tmp/patch-campanhas.rb
+
 # ── Casca dos e-mails internos ───────────────────────────────────────────────
 # Substitui o layout do Chatwoot pela casca da marca (mesma do ApolloAuth e do
 # ApolloPlan: fundo #0f1512, card #1a221d, verde #2fe68c, logo do Desk).
