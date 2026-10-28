@@ -34,7 +34,12 @@
     if (input.dataset.apolloVariavel) return;
     input.dataset.apolloVariavel = '1';
     var sel = document.createElement('select');
-    sel.className = 'apollo-variavel-select';
+    // mesma cara do campo do Desk: herda as classes (Tailwind) do input e copia o que o CSS do Vue escopa
+    sel.className = input.className + ' apollo-variavel-select';
+    var cs = window.getComputedStyle(input);
+    ['height', 'minHeight', 'border', 'borderRadius', 'backgroundColor', 'color', 'fontSize', 'fontFamily', 'fontWeight',
+     'lineHeight', 'paddingLeft', 'paddingRight', 'boxShadow', 'outline'].forEach(function (k) { sel.style[k] = cs[k]; });
+    sel.style.marginBottom = '0';
     sel.setAttribute('aria-label', 'Variável');
     OPCOES.forEach(function (o) {
       var op = document.createElement('option');
@@ -70,11 +75,10 @@
 
   var css = document.createElement('style');
   css.textContent =
-    '.apollo-variavel{display:flex;gap:.5rem;align-items:center;width:100%}' +
-    '.apollo-variavel > select{flex:0 0 auto;max-width:46%;min-width:11rem;height:2.5rem;border-radius:.75rem;' +
-    'border:1px solid rgba(128,128,128,.35);background:transparent;color:inherit;padding:0 .5rem;font:inherit}' +
-    '.apollo-variavel > input{flex:1 1 auto;min-width:0}' +
-    '.apollo-variavel > input[readonly]{opacity:.75}';
+    '.apollo-variavel{display:flex;gap:.5rem;align-items:stretch;width:100%}' +
+    '.apollo-variavel > select.apollo-variavel-select{flex:0 0 auto;width:auto;max-width:48%;min-width:11rem;cursor:pointer;' +
+    'appearance:auto;-webkit-appearance:menulist}' +
+    '.apollo-variavel > input{flex:1 1 auto;min-width:0}';
   document.head.appendChild(css);
 
   var obs = new MutationObserver(function (muts) {
