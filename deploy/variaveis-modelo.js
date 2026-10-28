@@ -61,8 +61,13 @@
     });
     var caixa = document.createElement('div');
     caixa.className = 'apollo-variavel';
+    // a seta mora no invólucro (posicionada no canto direito), não no select: o fundo do select
+    // é pintado a partir do conteúdo e a seta ficava colada ao texto
+    var inv = document.createElement('span');
+    inv.className = 'apollo-variavel-inv';
     input.parentNode.insertBefore(caixa, input);
-    caixa.appendChild(sel);
+    inv.appendChild(sel);
+    caixa.appendChild(inv);
     caixa.appendChild(input);
   }
 
@@ -76,10 +81,11 @@
   var css = document.createElement('style');
   css.textContent =
     '.apollo-variavel{display:flex;gap:.5rem;align-items:stretch;width:100%}' +
-    '.apollo-variavel > select.apollo-variavel-select{flex:0 0 auto;width:auto;max-width:48%;min-width:11rem;cursor:pointer;' +
-    'appearance:none!important;-webkit-appearance:none!important;padding-right:2.25rem!important;' +
-    'background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22%3E%3Cpath d=%22M1 1.5l5 5 5-5%22 fill=%22none%22 stroke=%22%23808080%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E")!important;' +
-    'background-repeat:no-repeat!important;background-position:right .8rem center!important;background-size:12px 8px!important}' +
+    '.apollo-variavel-inv{position:relative;flex:0 0 auto;display:inline-flex;max-width:48%;min-width:11rem}' +
+    '.apollo-variavel-inv > select.apollo-variavel-select{width:100%;cursor:pointer;margin:0;' +
+    'appearance:none!important;-webkit-appearance:none!important;padding-right:2.25rem!important;background-image:none!important}' +
+    '.apollo-variavel-inv::after{content:"";position:absolute;right:.85rem;top:50%;width:12px;height:8px;margin-top:-4px;pointer-events:none;' +
+    'background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22%3E%3Cpath d=%22M1 1.5l5 5 5-5%22 fill=%22none%22 stroke=%22%23808080%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E") no-repeat center/12px 8px}' +
     '.apollo-variavel > input{flex:1 1 auto;min-width:0}';
   document.head.appendChild(css);
 
