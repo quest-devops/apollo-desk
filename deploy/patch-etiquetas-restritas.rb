@@ -3,7 +3,8 @@
 #
 # O PEDIDO (Leonardo, 26/out/2026)
 # --------------------------------
-# Na Dagostino, toda etiqueta com "corp" no nome só pode ser usada pelo Roberto.
+# Na Dagostino, as etiquetas "corp-*" (carteiras) só podem ser usadas pelo Roberto.
+# ("clientes-corporativo" é de todos — padrão ancorado em ^corp-, 28/out/2026.)
 # O Chatwoot não tem isso: etiqueta é da conta inteira, qualquer agente aplica
 # qualquer uma (a edição Enterprise tem papéis, mas nunca por etiqueta).
 #
@@ -11,7 +12,7 @@
 # ---------
 # A regra mora nos custom_attributes da CONTA (dado, não código):
 #   account.custom_attributes['etiquetas_restritas'] =
-#     [ { 'padrao' => 'corp', 'usuarios' => [41] } ]      # regex (sem distinguir maiúsculas) + ids de usuário
+#     [ { 'padrao' => '^corp-', 'usuarios' => [41] } ]      # regex (sem distinguir maiúsculas) + ids de usuário
 # Quem pode: os ids listados e qualquer usuário @apollosolution.com.br (quem opera o Desk
 # precisa enxergar a etiqueta em Configurações › Etiquetas). Todo o resto NÃO VÊ a etiqueta:
 #   1. GET /labels (índice) filtra as restritas → somem do seletor da conversa, da barra
