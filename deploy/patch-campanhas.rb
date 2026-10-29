@@ -64,7 +64,14 @@ MODULO = <<~'RUBY'
     }.freeze
 
     # ---- envio (chamado pelo OneoffCampaignService no lugar de channel.send_template) ----
+    # Etiqueta que tira o contato de QUALQUER campanha (quem bloqueou, pediu para sair ou nunca comprou).
+    ETIQUETA_BLOQUEIO = 'nao-enviar'.freeze
+
     def self.enviar(campaign, contact, template_params)
+      if contact.label_list.map(&:to_s).include?(ETIQUETA_BLOQUEIO)
+        Rails.logger.info("[apollo-campanhas] campanha #{campaign.id}: contato #{contact.id} pulado (#{ETIQUETA_BLOQUEIO})")
+        return
+      end
       inbox = campaign.inbox
       contact_inbox = contact.contact_inboxes.find_by(inbox_id: inbox.id) ||
                       ContactInboxBuilder.new(contact: contact, inbox: inbox).perform
@@ -154,12 +161,16 @@ MODULO = <<~'RUBY'
         }
       end
       # Audiência sem mensagem: sem telefone = pulado; com telefone = ainda na fila (ou não processado).
+      bloqueados = campaign.account.contacts.tagged_with(ETIQUETA_BLOQUEIO).pluck(:id).to_set
       audiencia(campaign).where.not(id: vistos.keys).pluck(:id, :name, :phone_number).each do |cid, nome, fone|
         sem_fone = fone.blank?
+        bloqueado = bloqueados.include?(cid)
         linhas << {
-          contact: { id: cid, name: nome, phone_number: fone }, status: sem_fone ? 'skipped' : 'queued',
+          contact: { id: cid, name: nome, phone_number: fone }, status: (sem_fone || bloqueado) ? 'skipped' : 'queued',
           message_content: nil, error_code: nil, error_title: nil,
-          error_message: sem_fone ? 'Contato sem telefone' : (campaign.completed? ? 'Não processado pela campanha' : nil),
+          error_message: if bloqueado then "Contato com a etiqueta #{ETIQUETA_BLOQUEIO}"
+                         elsif sem_fone then 'Contato sem telefone'
+                         else (campaign.completed? ? 'Não processado pela campanha' : nil) end,
           responded: false, conversation_display_id: nil, sent_at: nil, accepted: false
         }
       end
